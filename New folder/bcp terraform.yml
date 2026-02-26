@@ -8,7 +8,11 @@ on:
     paths:
       - 'terraform/**'
 
-  
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'terraform/**'
 
 jobs:
   terraform:
@@ -41,14 +45,6 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.6.6
-      # ✅ ADD DEBUG STEP HERE
-      - name: Debug Secret
-        run: |
-          if [ -z "$TF_BUCKET_NAME" ]; then
-            echo "Secret is EMPTY"
-          else
-            echo "Secret is AVAILABLE"
-          fi
 
       # 4️⃣ Terraform Init
       - name: Terraform Init
