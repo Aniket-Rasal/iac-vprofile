@@ -35,7 +35,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: "Set up Terraform with specified version"
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: 1.6.3
 
@@ -55,7 +55,7 @@ jobs:
         id: terraform-plan
         run: terraform plan -no-color -input=false -out=tfplan
         continue-on-error: true
-        
+
 
       - name: Terraform plan status
         if: steps.terraform-plan.outcome == 'failure'
