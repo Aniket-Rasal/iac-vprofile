@@ -58,7 +58,9 @@ jobs:
       - name: Terraform plan status
         if: steps.terraform-plan.outcome == 'failure'
         run: exit 1
-      
+        
+
+        
       - name: "terraform apply"
         id: terraform-apply
         run: terraform apply -auto-approve tfplan
