@@ -1,9 +1,8 @@
-name: "Vprofile IAC"
+name: Vprofile IAC
 
 on:
   push:
     branches:
-      - main
       - stage
     paths:
       - 'terraform/**'
@@ -16,44 +15,57 @@ on:
 
 jobs:
   terraform:
+    name: Terraform CI/CD
     runs-on: ubuntu-latest
 
     defaults:
       run:
-        working-directory: terraform   # ✅ IMPORTANT
+        working-directory: terraform
 
     env:
-      BUCKET_TF_STATE: ${{ secrets.BUCKET_TF_STATE }}
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      TF_BUCKET_NAME: ${{ secrets.BUCKET_TF_STATE }}
       AWS_REGION: us-east-1
 
     steps:
-      - name: Checkout code
+      # 1️⃣ Checkout Repository
+      - name: Checkout Repository
         uses: actions/checkout@v3
 
+      # 2️⃣ Configure AWS Credentials
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # 3️⃣ Setup Terraform
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
 
-      - name: Debug Bucket
-        run: echo "Bucket: $BUCKET_TF_STATE"
-
+      # 4️⃣ Terraform Init
       - name: Terraform Init
         run: |
           terraform init \
-            -backend-config="bucket=${BUCKET_TF_STATE}" \
+            -backend-config="bucket=${TF_BUCKET_NAME}" \
             -backend-config="key=terraform.tfstate" \
             -backend-config="region=${AWS_REGION}"
 
+      # 5️⃣ Terraform Format Check
       - name: Terraform Format
-        run: terraform fmt -check
+        run: terraform fmt -check -recursive
 
+      # 6️⃣ Terraform Validate
       - name: Terraform Validate
         run: terraform validate
 
+      # 7️⃣ Terraform Plan
       - name: Terraform Plan
-        run: terraform plan -no-color -input=false -out=tfplan
+        run: terraform plan -input=false -no-color -out=tfplan
 
+      # 8️⃣ Terraform Apply (Only on stage branch)
       - name: Terraform Apply
         if: github.ref == 'refs/heads/stage'
         run: terraform apply -auto-approve tfplan
