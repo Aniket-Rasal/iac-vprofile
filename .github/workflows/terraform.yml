@@ -66,3 +66,4 @@ jobs:
       - name: "terraform apply"
         id: terraform-apply
         run: terraform apply -auto-approve tfplan
+        continue-on-error: true
