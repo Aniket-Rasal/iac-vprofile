@@ -73,14 +73,17 @@ jobs:
       # 8️⃣ Terraform Apply (Only on stage branch)
       - name: Terraform Apply
         if: github.ref == 'refs/heads/stage'
-        run: terraform apply -auto-approve tfplan
+        run: |
+         terraform apply -auto-approve -input=false -parallelism=1 tfplan
 
-      - name: Terraform Apply
-        id: apple
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -auto-approve -input=false -parallelism=1 tfplan
+      - name: Update kubeconfig for EKS
+        if: github.ref == 'refs/heads/stage'
+        run: |
+         aws eks update-kubeconfig \
+         --region ${AWS_REGION} \
+         --name vprofile-eks
 
-      - name: Install Ingress controller
-        if: steps.apple.outcome == 'success'
+      - name: Install Ingress Controller
+        if: github.ref == 'refs/heads/stage'
         run: |
           kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.7.0/deploy/static/provider/aws/deploy.yaml
