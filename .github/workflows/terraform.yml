@@ -50,7 +50,6 @@ jobs:
             echo "Secret is AVAILABLE"
           fi
 
-      # 4️⃣ Terraform Init
       - name: Terraform Init
         run: |
           terraform init \
