@@ -81,6 +81,6 @@ jobs:
         run: terraform apply -auto-approve tfplan -input=false -parallelism=1 planefile
 
       - name: Install Ingress controller
-        if: steps.apple.outcome == 'success' && steps.gitconfig.outcome == 'success'
+        if: steps.apple.outcome == 'success'
         run: |
           kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.7.0/deploy/static/provider/aws/deploy.yaml
